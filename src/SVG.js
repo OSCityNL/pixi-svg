@@ -1,4 +1,5 @@
 import dPathParse from 'd-path-parser';
+import arcToBezier from 'svg-arc-to-cubic-bezier';
 
 // <div> element to measure string colors like "black"
 // and convert to hex colors
@@ -310,14 +311,12 @@ export default class SVG extends PIXI.Graphics {
                     );
                     break;
                 }
-                case 'C': {
-                    const currX = x;
-                    const currY = y;
+                case 'C': { // SEE: https://github.com/bigtimebuddy/pixi-svg/issues/4
                     this.bezierCurveTo(
-                        currX + command.cp1.x,
-                        currY + command.cp1.y,
-                        currX + command.cp2.x,
-                        currY + command.cp2.y,
+                        command.cp1.x,
+                        command.cp1.y,
+                        command.cp2.x,
+                        command.cp2.y,
                         x = command.end.x,
                         y = command.end.y
                     );
@@ -358,6 +357,42 @@ export default class SVG extends PIXI.Graphics {
                         x = command.end.x,
                         y = command.end.y
                     );
+                    break;
+                }
+                case 'A': {
+                    // added method from arc to bezier based on svg-arc-to-cubic-bezier
+                    // TODO: relative arc
+                  
+                    const currX = x;
+                    const currY = y;
+                    const nextX = command.end.x;
+                    const nextY = command.end.y;
+
+                    let curves = arcToBezier({
+                        px : x,
+                        py : y,
+                        cx : command.end.x,
+                        cy : command.end.y,
+                        rx : command.radii.x,
+                        ry : command.radii.y,
+                        xAxisRotation: command.rotation,
+                        largeArcFlag : command.large,
+                        sweepFlag: command.clockwise
+                    });
+
+                    for( let c = 0; c < curves.length; c++)
+                    {
+                        let curCurve = curves[c];
+                        this.bezierCurveTo(
+                            curCurve.x1,
+                            curCurve.y1,
+                            curCurve.x2,
+                            curCurve.y2,
+                            curCurve.x,
+                            curCurve.y,
+                        )
+                    }
+
                     break;
                 }
                 default: {

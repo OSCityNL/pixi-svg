@@ -44,7 +44,8 @@
   },
   "homepage": "https://github.com/bigtimebuddy/pixi-svg#readme",
   "dependencies": {
-    "d-path-parser": "^1.0.0"
+    "d-path-parser": "^1.0.0",
+    "svg-arc-to-cubic-bezier": "^1.0.1"
   },
   "peerDependencies": {
     "pixi.js": "^4.0.0"
